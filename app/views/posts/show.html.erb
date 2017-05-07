@@ -1,1 +1,48 @@
+<h1><%= @post.title %></h1>
 
+<p><%= @post.content %></p>
+
+<p>Categories:</p>
+
+<ul>
+  <% @post.categories.each do |category| %>
+  <li><%= category.name %></li>
+  <% end %>
+</ul>
+
+<p>Comments:</p>
+
+<ul>
+  <% @post.comments.each do |comment| %>
+    <% if comment.user %>
+      <li><%= comment.try(:user).try(:username) %> says: <%= comment.content %></li>
+    <% end %>
+  <% end %>
+</ul>
+
+<ul>
+  <% @post.comments.collect{ |comment| comment.user}.uniq.each do |user| %>
+    <% if user %>
+      <li><%= link_to user.username, user_path(user) %>
+    <% end %>
+  <% end %>
+</ul>
+
+<p>Add Comment:</p>
+
+<%= form_for @comment do |f| %>
+  <%= f.collection_select(:user_id, User.all, :id, :username, include_blank: true) %>
+  <%= f.hidden_field :post_id, value: @post.id %><br /><br />
+
+  <%= f.fields_for :user, @comment.build_user do |user_attributes| %>
+    <%= user_attributes.label "Username" %>
+    <%= user_attributes.text_field :username %><br />
+    <%= user_attributes.label "E-Mail Address" %>
+    <%= user_attributes.text_field :email %>
+  <% end %>
+  <br />
+  <%= f.label "Comment" %>
+  <%= f.text_area :content %>
+
+  <%= f.submit %>
+<% end %>
